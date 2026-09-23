@@ -1,0 +1,12 @@
+[project]
+name = "great-expectations-learning"
+version = "0.1.0"
+description = "Project-based learning with Great Expectations and Python"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "jupyter",
+]
