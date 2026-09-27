@@ -1,0 +1,11 @@
+customer_id,name,email,age,country,status
+C001,Alice Johnson,alice@example.com,32,India,active
+C002,Bob Smith,bob@example.com,45,India,active
+C003,Charlie Brown,charlie@example.com,28,USA,active
+C004,Diana Prince,diana@example.com,35,UK,inactive
+C005,Ethan Hunt,ethan@example.com,41,USA,active
+C006,Fiona Green,fiona@example.com,29,India,active
+C007,George Miller,george@example.com,52,Canada,active
+C008,Hannah Lee,hannah@example.com,24,India,active
+C009,Ian Wright,ian@example.com,38,UK,active
+C010,Julia Adams,julia@example.com,31,USA,inactive
