@@ -1,0 +1,684 @@
+# Great Expectations — Revised Project-Based Curriculum
+
+The goal is to use **fewer projects**, but make each one substantially deeper. By the end, you should be comfortable with the GX concepts most commonly used in real Python/data-engineering work, plus the kinds of scenarios that commonly appear in interviews.
+
+## Overall Progression
+
+```text
+Project 1
+Fundamentals
+     ↓
+Project 2
+Intermediate / Advanced Validation
+     ↓
+Project 3
+Production-Grade Data Quality Pipeline
+     ↓
+Project 4
+Interview-Style Data Engineering Project
+     ↓
+Project 5
+Advanced / Interview Features
+```
+
+---
+
+# Project 1 — Customer Data Quality Fundamentals
+
+### Level
+
+**Beginner → Lower Intermediate**
+
+This is the project we are currently working on.
+
+### Business Scenario
+
+You receive a customer dataset from an upstream system. Before the data is loaded into an analytics system, you need to determine whether it satisfies basic data-quality requirements.
+
+Example:
+
+```text
+customer_id
+name
+email
+age
+status
+created_at
+```
+
+### GX concepts
+
+* GX installation and setup
+* `DataContext`
+* File Data Context
+* Data Sources
+* Data Assets
+* Batch Definitions
+* Batches
+* Expectations
+* Expectation Suites
+* Validation
+* Validation Results
+* Checkpoints
+* Data Docs
+* GX configuration
+* Stores
+* Persistent vs ephemeral context
+* Validation result interpretation
+* Handling validation failures
+
+### Expectations
+
+You will implement expectations such as:
+
+```text
+customer_id → not null
+customer_id → unique
+
+age → between 18 and 100
+
+status → active/inactive
+
+email → not null
+email → valid regex
+```
+
+### Important practical skills
+
+Rather than just creating expectations, you will learn to answer:
+
+> What does this validation failure actually tell the data engineer?
+
+For example:
+
+```text
+FAILED:
+customer_id uniqueness
+
+unexpected_count = 2
+unexpected values = C001, C001
+```
+
+And:
+
+```text
+FAILED:
+email regex
+
+unexpected_count = 1
+unexpected value = not-an-email
+```
+
+### Deliverable
+
+A working GX project containing:
+
+```text
+gx/
+├── expectations/
+├── validation_definitions/
+├── checkpoints/
+├── uncommitted/
+└── great_expectations.yml
+```
+
+with Data Docs showing the validation results.
+
+### Outcome
+
+You should understand the fundamental GX mental model:
+
+```text
+Data
+ ↓
+Data Source
+ ↓
+Data Asset
+ ↓
+Batch
+ ↓
+Expectation
+ ↓
+Expectation Suite
+ ↓
+Validation
+ ↓
+Validation Result
+ ↓
+Checkpoint
+ ↓
+Data Docs
+```
+
+---
+
+# Project 2 — Intermediate Data Quality & Complex Validation
+
+### Level
+
+**Intermediate**
+
+Now we move beyond simple column checks.
+
+### Business Scenario
+
+You receive **orders and customers data** from multiple upstream systems.
+
+```text
+customers.csv
+orders.csv
+products.csv
+```
+
+The data contains realistic problems:
+
+* duplicates
+* missing values
+* invalid categories
+* invalid dates
+* incorrect data types
+* impossible numerical values
+* schema changes
+* referential integrity problems
+* suspicious distributions
+
+### GX concepts
+
+You will learn:
+
+* More advanced Expectations
+* Table-level Expectations
+* Row-count validation
+* Data-type validation
+* Date/time validation
+* String validation
+* Pattern validation
+* Set membership
+* Distribution/statistical checks
+* Multiple datasets
+* Batch-level thinking
+* Reusable validation logic
+* Validation failure analysis
+* Expectation parameters
+* Dynamic validation rules where appropriate
+
+### Example rules
+
+```text
+orders.order_id
+    → not null
+    → unique
+
+orders.customer_id
+    → not null
+    → should correspond to customers
+
+orders.amount
+    → >= 0
+
+orders.order_date
+    → valid date
+    → not in the future
+
+orders.status
+    → expected set of values
+
+orders
+    → minimum expected row count
+```
+
+### Important challenge
+
+Instead of simply asking:
+
+> "Which expectation should I use?"
+
+you'll start asking:
+
+> "What business rule am I trying to enforce?"
+
+For example:
+
+```text
+Business rule:
+Every order must belong to an existing customer.
+
+Question:
+Can a simple column expectation validate this?
+
+If not:
+How should we design the validation?
+```
+
+### Deliverable
+
+A reusable validation framework for several datasets.
+
+### Outcome
+
+You should be able to look at a new dataset and independently design a reasonable GX validation strategy.
+
+---
+
+# Project 3 — Production-Grade Data Quality Pipeline
+
+### Level
+
+**Advanced / Production**
+
+Now GX becomes part of a real data-engineering workflow.
+
+### Business Scenario
+
+Imagine a daily pipeline:
+
+```text
+Source
+  ↓
+Extract
+  ↓
+Transform
+  ↓
+GX Validation
+  ↓
+Quality Gate
+  ↓
+Warehouse
+```
+
+Bad data should **not reach the warehouse**.
+
+### Concepts
+
+You will learn:
+
+* Checkpoints properly
+* Validation Definitions
+* Automated validation
+* Validation result persistence
+* Data Docs
+* Configuration management
+* Environment-specific configuration
+* Secrets/config variables
+* Reusable validation functions
+* Error handling
+* Logging
+* Quality gates
+* Pass/fail pipeline decisions
+* Multiple batches
+* Multiple datasets
+* Schema evolution
+* Handling expected vs unexpected failures
+* Production directory structure
+
+### Example
+
+```python
+validation_result = checkpoint.run()
+
+if not validation_result.success:
+    # stop pipeline
+    ...
+```
+
+The important concept is:
+
+```text
+GX validation
+       ↓
+Quality decision
+       ↓
+Pipeline action
+```
+
+### Schema evolution
+
+You'll intentionally introduce changes such as:
+
+```text
+Original:
+
+customer_id
+name
+email
+age
+
+
+New:
+
+customer_id
+name
+email
+age
+country
+```
+
+and eventually:
+
+```text
+email removed
+```
+
+You will decide how the pipeline should react.
+
+### Deliverable
+
+A production-style project such as:
+
+```text
+data-quality-project/
+│
+├── gx/
+│   ├── expectations/
+│   ├── validation_definitions/
+│   ├── checkpoints/
+│   └── great_expectations.yml
+│
+├── src/
+│   ├── pipeline.py
+│   ├── validation.py
+│   └── quality_gate.py
+│
+├── tests/
+│
+├── data/
+│
+└── README.md
+```
+
+### Outcome
+
+You should understand how GX fits into an actual data pipeline rather than treating it as a standalone validation library.
+
+---
+
+# Project 4 — Interview-Style Data Engineering Project
+
+### Level
+
+**Advanced**
+
+This project will deliberately be less tutorial-like.
+
+You will receive a messy business dataset and a set of requirements.
+
+For example:
+
+```text
+E-commerce order pipeline
+```
+
+with:
+
+```text
+customers
+orders
+payments
+products
+```
+
+You will **design the validation strategy yourself**.
+
+I won't immediately tell you which Expectations to use.
+
+### You will need to determine
+
+```text
+What should be validated?
+
+Which expectation should be used?
+
+At what level should it be validated?
+
+What should happen when it fails?
+
+Which failures are critical?
+
+Which failures can be warnings?
+
+How should the result affect the pipeline?
+```
+
+### Interview-style scenarios
+
+You'll be given questions such as:
+
+> The pipeline processed 2 million rows yesterday but only 400,000 today. How would you detect this?
+
+> How would you validate that a column contains only expected categories?
+
+> How would you detect duplicate business keys?
+
+> How would you handle a schema change?
+
+> How would you stop bad data from reaching the warehouse?
+
+> How would you make the validation reusable across multiple datasets?
+
+> How would you debug a failed GX validation?
+
+### Deliverable
+
+A complete validation solution where **you design most of the architecture**.
+
+### Outcome
+
+This project tests whether you can actually apply GX rather than recognize GX terminology.
+
+---
+
+# Project 5 — Advanced / Interview Feature Project
+
+### Level
+
+**Advanced / Specialized**
+
+This final project covers features and scenarios that aren't necessarily needed every day but are useful for interviews and demonstrate deeper GX knowledge.
+
+Possible areas include:
+
+* Custom Expectations
+* Advanced/custom validation logic
+* Parameterized Expectations
+* Dynamic thresholds
+* Runtime batch parameters
+* Multiple validation definitions
+* Advanced result formats
+* Custom Data Docs
+* Custom renderers
+* Reusable validation utilities
+* More sophisticated statistical validation
+* Complex business rules
+* Data-quality monitoring concepts
+
+### Example challenge
+
+Suppose the business rule is:
+
+> Daily transaction volume should normally remain within a reasonable range of historical volume.
+
+Instead of:
+
+```text
+row_count >= 1000
+```
+
+you might need something conceptually closer to:
+
+```text
+today_count
+    compared with
+historical_counts
+```
+
+You will explore how to represent such requirements and where GX fits versus where ordinary Python/data-engineering logic may be more appropriate.
+
+### Deliverable
+
+A small but sophisticated GX component demonstrating an advanced validation pattern.
+
+---
+
+# Final Practical Assessment
+
+After Project 5, we'll do a separate assessment rather than immediately declaring the curriculum complete.
+
+It will contain five sections.
+
+## 1. Concept Questions
+
+For example:
+
+```text
+What is the difference between:
+
+Data Source
+Data Asset
+Batch
+Batch Definition
+Expectation
+Expectation Suite
+Validation
+Validation Result
+Checkpoint
+```
+
+---
+
+## 2. "Which GX Feature Would You Use?"
+
+Example:
+
+> You need to validate that `customer_id` is unique.
+
+You choose the appropriate expectation.
+
+Then:
+
+> You need to ensure the entire dataset contains at least 100,000 rows.
+
+You choose the appropriate approach.
+
+Then:
+
+> You need to stop a pipeline when critical validation fails.
+
+You design the quality gate.
+
+---
+
+## 3. Debugging
+
+You'll receive deliberately broken code such as:
+
+```python
+validation_result = validation_definition.run()
+```
+
+with a batch-parameter problem.
+
+You'll need to diagnose it rather than simply receive the fix.
+
+---
+
+## 4. Coding
+
+Small exercises such as:
+
+```python
+for result in validation_result.results:
+    ...
+```
+
+You'll extract:
+
+* failed expectations
+* affected columns
+* unexpected counts
+* unexpected values
+* overall success
+* failure percentages
+
+---
+
+## 5. End-to-End Challenge
+
+Finally:
+
+```text
+Raw data
+   ↓
+Data source
+   ↓
+Data asset
+   ↓
+Batch
+   ↓
+Expectation suite
+   ↓
+Validation
+   ↓
+Checkpoint
+   ↓
+Quality gate
+   ↓
+Pipeline decision
+   ↓
+Data Docs / reporting
+```
+
+You will build the solution with minimal guidance.
+
+---
+
+# Target Coverage
+
+By the end, the emphasis will be:
+
+| Area                            | Target |
+| ------------------------------- | ------ |
+| GX Fundamentals                 | ⭐⭐⭐⭐⭐  |
+| Expectations                    | ⭐⭐⭐⭐⭐  |
+| Expectation Suites              | ⭐⭐⭐⭐⭐  |
+| Validation                      | ⭐⭐⭐⭐⭐  |
+| Checkpoints                     | ⭐⭐⭐⭐⭐  |
+| Data Sources / Assets / Batches | ⭐⭐⭐⭐⭐  |
+| Data Docs                       | ⭐⭐⭐⭐   |
+| Python integration              | ⭐⭐⭐⭐⭐  |
+| Failure handling                | ⭐⭐⭐⭐⭐  |
+| Pipeline integration            | ⭐⭐⭐⭐⭐  |
+| Schema validation               | ⭐⭐⭐⭐   |
+| Multiple datasets               | ⭐⭐⭐⭐   |
+| Reusable validation             | ⭐⭐⭐⭐   |
+| Configuration                   | ⭐⭐⭐⭐   |
+| Production patterns             | ⭐⭐⭐⭐⭐  |
+| CI/CD concepts                  | ⭐⭐⭐    |
+| Advanced/custom features        | ⭐⭐⭐    |
+| Interview readiness             | ⭐⭐⭐⭐⭐  |
+
+## Learning philosophy
+
+We will **not** rush through all five projects.
+
+For each project:
+
+```text
+Explain
+   ↓
+Demonstrate
+   ↓
+You implement
+   ↓
+You encounter/debug failures
+   ↓
+Code review
+   ↓
+Extend the solution
+   ↓
+Explain the concept yourself
+```
+
+And importantly, **Project 4 and Project 5 will intentionally reduce the amount of hand-holding**. That's where we'll find out whether you've actually internalized GX.
+
+**Current status: Project 1 — near completion.**
+The next major step is to finish the remaining Project 1 production concepts, then move into Project 2's intermediate validation problems.
