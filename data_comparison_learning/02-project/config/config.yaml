@@ -1,0 +1,10 @@
+comparisons:
+  - name: customers
+    source: data/source/customers.csv
+    target: data/dest/customers.csv
+
+    join_columns:
+      - customer_id
+
+    abs_tol: 0
+    rel_tol: 0

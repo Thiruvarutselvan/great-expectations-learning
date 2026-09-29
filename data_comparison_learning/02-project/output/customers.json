@@ -1,0 +1,11 @@
+{
+  "validation": {
+    "passed": false,
+    "all_columns_match": true,
+    "all_rows_overlap": false,
+    "intersect_rows_match": "False"
+  },
+  "mismatch_count": 1,
+  "df1_unique_columns": "OrderedSet()",
+  "df2_unique_columns": "OrderedSet()"
+}
